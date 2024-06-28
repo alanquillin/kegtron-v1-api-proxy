@@ -36,10 +36,9 @@ class ItemAlreadyExists(Error):
         super().__init__(message)
 
 
-class InvalidExternalBrewingTool(Error):
-    def __init__(self, name, message=None):
+class InvalidKegtronAdvertisementData(Error):
+    def __init__(self, message=None):
         if not message:
-            message = f"Invalid external brewing tool: {name}"
+            message = "Invalid Kegtron Advertisement Data Packet"
 
         super().__init__(message)
-        self.name = name

@@ -51,6 +51,7 @@ authors = ["alanquillin"]
 description = "Kegtron v1 API Proxy"
 
 [tool.poetry.dependencies]
+python = "^3.8"
 Flask = "^3.0.3"
 SQLAlchemy-Utils = "^0.41.2"
 alembic = "^1.13.2"
@@ -58,8 +59,10 @@ simplejson = "^3.19.2"
 sqlalchemy = "^2.0.31"
 bleson = "^0.1.8"
 gevent = "^24.2.1"
+python-dateutil = "^2.9.0"
 
 [tool.poetry.dev-dependencies]
-bandit = "^1.6.2"
-black = "^20.8b1"
-pylint = "^2.6.0"
+bandit = "^1.7.9"
+black = "^24.4.2"
+pylint = "^3.2.5"
+isort = "^5.13.2"
