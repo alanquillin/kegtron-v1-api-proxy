@@ -1,0 +1,65 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+src_paths = ["api"]
+ensure_newline_before_comments = true
+force_grid_wrap = 0
+include_trailing_comma = true
+line_length = 160
+multi_line_output = 3
+use_parentheses = true
+
+[tool.black]
+line-length = 160
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 160
+disable = [
+    "bad-continuation",
+    "bad-whitespace",
+    "fixme",
+    "invalid-name",
+    "missing-docstring",
+    "missing-module-docstring",
+    "no-member",  # disabling until this issue is resolved: https://github.com/PyCQA/pylint/issues/533
+    "too-few-public-methods",
+    "too-many-ancestors",
+    "too-many-branches",
+    "too-many-instance-attributes",
+    "too-many-locals",
+    "too-many-nested-blocks",
+    "too-many-public-methods",
+    "too-many-return-statements",
+    "too-many-statements",
+    "wrong-import-order"
+]
+
+[tool.pylint.'FORMAT']
+max-branches = 15
+max-line-length = 160
+max-statements = 60
+
+[tool.pytest.ini_options]
+addopts = "--cov api --cov-report term-missing --cov-fail-under 80 --log-level DEBUG"
+
+[tool.poetry]
+name = "kegtron-v1-api-proxy"
+version = "0.1.0"
+authors = ["alanquillin"]
+description = "Kegtron v1 API Proxy"
+
+[tool.poetry.dependencies]
+Flask = "^3.0.3"
+SQLAlchemy-Utils = "^0.41.2"
+alembic = "^1.13.2"
+simplejson = "^3.19.2"
+sqlalchemy = "^2.0.31"
+bleson = "^0.1.8"
+gevent = "^24.2.1"
+
+[tool.poetry.dev-dependencies]
+bandit = "^1.6.2"
+black = "^20.8b1"
+pylint = "^2.6.0"
