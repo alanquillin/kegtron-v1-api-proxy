@@ -16,13 +16,12 @@ RUN poetry config virtualenvs.in-project true
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-interaction --no-ansi --only main --no-root
 RUN poetry run pip install psycopg2-binary "flask[async]"
+RUN poetry run pip install -U bleak
 
 RUN apt-get purge -y --auto-remove gcc build-essential libffi-dev libssl-dev
 
-
 ENV PYTHONUNBUFFERED=1
 ENV CONFIG_BASE_DIR=/kegtron-v1-api-proxy/config
-
 
 COPY src /kegtron-v1-api-proxy/src
 COPY entrypoint.sh /kegtron-v1-api-proxy/src

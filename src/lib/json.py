@@ -9,8 +9,6 @@ from json import load, loads
 
 import simplejson
 
-from lib import UsefulEnum
-
 
 class KegtronProxyJsonEncoder(simplejson.JSONEncoder):
     def default(self, o):  # pylint: disable=method-hidden

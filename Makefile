@@ -50,12 +50,14 @@ endif
 
 depends: 
 	$(POETRY_VARS) $(POETRY) install --no-root && \
-	$(POETRY_VARS) $(POETRY) run pip install "flask[async]"
+	$(POETRY_VARS) $(POETRY) run pip install "flask[async]" && \
+	$(POETRY_VARS) $(POETRY) run pip install -U bleak
 	
 
 update-depends:
 	$(POETRY_VARS) $(POETRY) update && \
-	$(POETRY_VARS) $(POETRY) run pip install -U "flask[async]"
+	$(POETRY_VARS) $(POETRY) run pip install -U "flask[async]" && \
+	$(POETRY_VARS) $(POETRY) run pip install -U bleak
 
 
 # dev

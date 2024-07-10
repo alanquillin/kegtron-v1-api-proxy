@@ -1,5 +1,3 @@
-#!python3
-
 import argparse
 import os
 import logging
@@ -13,12 +11,12 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 import requests
 
 from lib.logging import init as init_logging 
-from lib import kegtron 
+from kegtron import parser as kegtron_parser
 from lib.config import Config
 
 LOG = logging.getLogger("ble_scanner")
 CONFIG = Config()
-proxy_url_prefix = ""
+proxy_url_prefix = f'{CONFIG.get("proxy.scheme")}://{CONFIG.get("proxy.hostname")}:{CONFIG.get("proxy.port")}/api/internal/v1'
 
 kegtron_devices = {}
 
@@ -70,7 +68,7 @@ def on_adv(adv):
     addr = adv.address.string
     if(addr not in kegtron_devices.keys()):
         if adv.short_name and adv.short_name.startswith("Kegtron"):
-            add_new_dev(addr, kegtron.short_name, adv)
+            add_new_dev(addr, adv.short_name, adv)
         elif adv.complete_name and adv.complete_name.startswith("Kegtron"):
             add_new_dev(addr, adv.complete_name, adv)
 
@@ -80,7 +78,7 @@ def on_adv(adv):
         raw_data = bytes(adv)
         LOG.debug(f'Raw Data: {raw_data}')
         try:
-            parsed_data = kegtron.parse(raw_data[0:31])
+            parsed_data = kegtron_parser.parse(raw_data[0:31])
         except Exception as ex:
             LOG.error(f'Failed to parse Kegtron data: Error: {ex.message}, Data: {raw_data}')
             return
@@ -113,9 +111,7 @@ if __name__ == "__main__":
     app_config = CONFIG
     app_config.setup(env_prefix="KENGTRON_SCANNER", config_overrides={"proxy": {"enabled": not args.no_proxy}})
 
-    proxy_url_prefix = f'{CONFIG.get("proxy.scheme")}://{CONFIG.get("proxy.hostname")}:{CONFIG.get("proxy.port")}/api/internal/v1'
-
-    init_logging()
+    init_logging(config=CONFIG)
 
     ignore_logging_modules = ['bleson']
     for i in ignore_logging_modules:
