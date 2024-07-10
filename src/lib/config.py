@@ -79,13 +79,12 @@ def to_dict(val, *args):
 
 class Config(metaclass=ThreadSafeSingleton):
     defaults = {
-        "db": {"username": "brew_user", "host": "localhost", "port": 5432, "name": "brewhouse"},
-        "log_level": "",
+        "proxy": {"scheme": "http", "port": 5000, "hostname": "localhost", "enabled": True}
     }
 
-    default_schema = {"db.port": "int", "logging.levels": "dict"}
+    default_schema = {"proxy.port": "int", "proxy.enabled": "bool", "logging.levels": "dict"}
 
-    key_aliases = {"APP_ID": ["brewhouse-manager"]}
+    key_aliases = {"APP_ID": ["KEGTRON_PROXY"]}
     type_conversions = {"int": to_int, "bool": to_bool, "list": to_list, "dict": to_dict}
 
     def __init__(self, **kwargs):

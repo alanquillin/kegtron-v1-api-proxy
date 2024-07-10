@@ -22,16 +22,6 @@ speed-measure-plugin.json
 .history/*
 .editorconfig
 
-# misc
-/.sass-cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-/typings
-
 # System Files
 .DS_Store
 Thumbs.db
@@ -91,16 +81,6 @@ venv.bak/
 # GPG Files
 **/gpg/.gnupg/*
 !**/gpg/.gnupg/gpg.conf
-
-# terraform + terragrunt
-*.tfstate
-*.out
-terragrunt.iml
-*.tfstate.backup
-.terraform
-*.tfvars
-!terraform.tfvars
-.terragrunt-cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

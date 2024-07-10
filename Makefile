@@ -19,9 +19,21 @@ PYLINT := $(POETRY) run pylint
 PYTEST := $(POETRY) run pytest
 PYTHON := $(POETRY) run python3
 
+TAG_LATEST := false
+DOCKER_IMAGE ?= kegtron-v1-api-proxy
+DOCKER_IMAGE_TAG_DEV ?= dev
+DOCKER := $(shell which docker)
+IMAGE_REPOSITORY := alanquillin
+REPOSITORY_IMAGE ?= $(DOCKER_IMAGE)
+PLATFORMS ?= linux/amd64,linux/arm64,linux/arm
+
 ifeq ($(POETRY),)
 $(error Poetry is not installed and is required)
 endif
+
+# ifeq ($(DOCKER),)
+# $(error Docker is not installed and is required)
+# endif
 
 ifneq ("$(wildcard .env)","")
     include .env
@@ -37,25 +49,33 @@ endif
 # dependency targets
 
 depends: 
-	$(POETRY_VARS) $(POETRY) install --no-root
+	$(POETRY_VARS) $(POETRY) install --no-root && \
+	$(POETRY_VARS) $(POETRY) run pip install "flask[async]"
+	
 
 update-depends:
-	$(POETRY_VARS) $(POETRY) update
+	$(POETRY_VARS) $(POETRY) update && \
+	$(POETRY_VARS) $(POETRY) run pip install -U "flask[async]"
 
+
+# dev
+
+build-dev: depends
+	$(DOCKER) build $(DOCKER_BUILD_ARGS) --build-arg build_for=dev -t $(DOCKER_IMAGE):$(DOCKER_IMAGE_TAG_DEV) .
 
 # Targets for running the app
 
-run-dev-local: build-dev build-db-seed
-	$(PYTHON) api/api.pi --debug
+run-dev-local: 
+	$(PYTHON) src/api.py --log DEBUG
 
 run-local:
-	$(PYTHON) api/api.pi
+	$(PYTHON) src/api.py
 
 scan:
-	$(PYTHON) scan.py 
+	$(PYTHON) src/scan.py 
 
 scan-dev:
-	$(PYTHON) scan.py --debug
+	$(PYTHON) src/scan.py --log DEBUG
 
 # run-db-migrations:
 # 	./migrate.sh upgrade head
@@ -63,13 +83,13 @@ scan-dev:
 # Testing and Syntax targets
 
 lint:
-	$(ISORT) --check-only api
-	pushd ./api && $(PYLINT) .	 && popd
-	$(BLACK) --check api
+	$(ISORT) --check-only src
+	pushd ./src && $(PYLINT) . && popd
+	$(BLACK) --check src
 
 format:
-	$(ISORT) api
-	$(BLACK) api
+	$(ISORT) src
+	$(BLACK) src
 
 # Migrations
 
