@@ -12,12 +12,12 @@ def get_log_level(log_level_str, default_level=INFO):
     return getattr(logging, log_level_str.upper(), default_level)
 
 
-def init(config=None, fmt=DEFAULT_LOG_FMT):
+def init(config=None, fmt=DEFAULT_LOG_FMT, arg_log_level="INFO"):
     if not config:
         config = Config()
 
     log_levels = config.get("logging.levels", {})
-    default_log_level_fallback = log_levels.pop("default", "INFO")
+    default_log_level_fallback = log_levels.pop("default", arg_log_level)
 
     log_level = get_log_level(config.get("log_level", config.get("logging.level", default_log_level_fallback)))
 
