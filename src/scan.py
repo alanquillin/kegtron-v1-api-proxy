@@ -16,7 +16,7 @@ from kegtron import parser as kegtron_parser
 
 LOG = logging.getLogger("ble_scanner")
 CONFIG = Config()
-proxy_url_prefix = f'{CONFIG.get("proxy.scheme")}://{CONFIG.get("proxy.hostname")}:{CONFIG.get("proxy.port")}/api/internal/v1'
+proxy_url_prefix = None
 
 kegtron_devices = {}
 
@@ -108,9 +108,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    CONFIG.setup(env_prefix="KENGTRON_SCANNER", config_overrides={"proxy": {"enabled": not args.no_proxy}})
     app_config = CONFIG
-    app_config.setup(env_prefix="KENGTRON_SCANNER", config_overrides={"proxy": {"enabled": not args.no_proxy}})
 
+    proxy_url_prefix = f'{CONFIG.get("proxy.scheme")}://{CONFIG.get("proxy.hostname")}:{CONFIG.get("proxy.port")}/api/internal/v1'
+    
     init_logging(config=CONFIG)
 
     ignore_logging_modules = ['bleson']
