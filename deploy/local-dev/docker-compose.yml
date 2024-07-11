@@ -4,16 +4,15 @@ services:
     image : nginx:latest 
     expose: 
       - 80
-      - 443
+      #- 443
     ports:
       - 80:80
-      - 443:443
+      #- 443:443
     environment:
       TZ: America/New_York
     volumes:  
       - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
-      - ./certs/localhost.crt:/etc/nginx/certs/localhost.crt
-      - ./certs/localhost.key:/etc/nginx/certs/localhost.key
+      #- ./certs/:/etc/nginx/certs
     depends_on:
       - api
   api:
