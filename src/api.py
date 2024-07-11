@@ -11,8 +11,8 @@ from gevent.pywsgi import WSGIServer
 
 from lib.logging import init as init_logging
 from lib.config import Config
-# import kegtgron
-# from kegtron import gatt
+#import kegtron
+#from kegtron import gatt
 # from lib.json import KegtronProxyJsonEncoder
 
 LOG = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ async def reset_volume_rpc(id):
     # size_key = None
     # volume_key = None
     # if port_index == 0:
-    #     # u_data[kegtron.CHAR_XGATT_PULSE_ACCUM_RST_UUID] = 0x42
+    #     u_data[kegtron.CHAR_XGATT0_PULSE_ACCUM_RST_HANDLE] = 0x42
     #     size_key = kegtron.CHAR_XGATT0_VOL_SIZE_HANDLE
     #     volume_key = kegtron.CHAR_XGATT0_VOL_START_HANDLE
     # elif port_index == 1:
@@ -96,7 +96,7 @@ async def reset_volume_rpc(id):
 
 
 @app.route(f'{PREFIX}/devices/<string:id>/rpc/Kegtron.UnlockWriteAll', methods=['POST'])
-async def unlock_write_rpc(id):
+async def unlock_write_all_rpc(id):
     return "Method not yet implemented", 405
     # device = kegtron_devices.get(id)
     # if not device:

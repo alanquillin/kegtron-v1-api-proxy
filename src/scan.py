@@ -11,8 +11,8 @@ from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 import requests
 
 from lib.logging import init as init_logging 
-from kegtron import parser as kegtron_parser
 from lib.config import Config
+from kegtron import parser as kegtron_parser
 
 LOG = logging.getLogger("ble_scanner")
 CONFIG = Config()

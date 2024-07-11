@@ -32,5 +32,8 @@ ipython_config.py
 .venv
 .env.swp
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
 # vim
 *.swp
