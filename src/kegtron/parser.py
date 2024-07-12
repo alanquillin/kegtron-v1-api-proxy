@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from bleak import BleakClient, BleakScanner
 
 from lib.exceptions import InvalidKegtronAdvertisementData
+from lib.time import utcnow_aware
 
 LOG = logging.getLogger("kegtron.parser")
 
@@ -60,7 +61,7 @@ def parse_scan(data):
         "start_volume": vol_start,
         "Volume_dispensed_ml": vol_disp,
         "port_name": port_name.decode("utf-8"),
-        #"last_update_timestamp_utc": datetime.now(timezone.utc),
+        "last_update_timestamp_utc": utcnow_aware(),
         "configured": port_configured,
         "port_index": port_index
     }

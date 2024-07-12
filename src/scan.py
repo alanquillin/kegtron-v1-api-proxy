@@ -1,17 +1,18 @@
 import argparse
 import os
 import logging
-from time import sleep
-from datetime import datetime, timezone
+from datetime import datetime
 import sys
 
 from adafruit_ble import BLERadio
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
+from flask import jsonify
 import requests
 
 from lib.logging import init as init_logging 
 from lib.config import Config
+from lib.time import utcnow_aware
 from kegtron import parser as kegtron_parser
 
 LOG = logging.getLogger("ble_scanner")
@@ -24,6 +25,17 @@ kegtron_devices = {}
 def name_to_id(name):
     return name.lower().replace(" ", "-")
 
+
+def to_json(data):
+    if isinstance(data, dict):
+        for k, v in data.items():
+            data[k] = to_json(v)    
+        return data 
+    
+    if isinstance(data, datetime):
+        return data.isoformat()
+    
+    return data
 
 def add_new_dev(addr, name, adv):
     data = {"mac": addr, "name": name, "id": name_to_id(name), "ports": {}}
@@ -38,7 +50,7 @@ def save_device(data):
 
     LOG.info(f'Saving device to proxy: "{data.get("name")}"')
     LOG.debug(f'Device data: {data}')
-    r = requests.post(f'{proxy_url_prefix}/devices', json=data)
+    r = requests.post(f'{proxy_url_prefix}/devices', json=to_json(data))
     if r.status_code != 201:
         if r.status_code == 400 and "The device already exists" in r.text:
             LOG.debug("Device already exists, so we are good!")
@@ -57,7 +69,7 @@ def update_device(data):
 
     # TODO This is going to get chatty.  Should store that hash for the data and last saved time and on update on a change to the device OR after a period of time.  
     LOG.debug(f'Updating device "{data.get("name")}" on proxy.  Device data: {data}')
-    r = requests.put(f'{proxy_url_prefix}/devices/{data.get("id")}', json=data)
+    r = requests.put(f'{proxy_url_prefix}/devices/{data.get("id")}', json=to_json(data))
     if r.status_code != 200:
         LOG.error(f'Failed to update device data. Status Code: {r.status_code}, Message: {r.text}')
     else:
@@ -74,7 +86,7 @@ def on_adv(adv):
 
     if(addr in kegtron_devices.keys()):
         kegtron_devices[addr]["rssi"] = adv.rssi
-        #kegtron_devices[addr]["last_advertisement_timestamp_utc"] = datetime.now(timezone.utc)
+        kegtron_devices[addr]["last_advertisement_timestamp_utc"] = utcnow_aware()
         raw_data = bytes(adv)
         LOG.debug(f'Raw Data: {raw_data}')
         try:
