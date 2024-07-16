@@ -23,4 +23,4 @@ def update(id, data):
         _d.update(data)
     
     DEVICES[id] = _d
-    return _id
+    return _d
