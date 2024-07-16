@@ -79,10 +79,11 @@ def to_dict(val, *args):
 
 class Config(metaclass=ThreadSafeSingleton):
     defaults = {
-        "proxy": {"scheme": "http", "port": 5000, "hostname": "localhost", "enabled": True}
+        "proxy": {"scheme": "http", "port": 5000, "hostname": "localhost", "enabled": True},
+        "force_device_update_after_sec": 300
     }
 
-    default_schema = {"proxy.port": "int", "proxy.enabled": "bool", "logging.levels": "dict"}
+    default_schema = {"proxy.port": "int", "proxy.enabled": "bool", "logging.levels": "dict", "force_device_update_after_sec": "int"}
 
     key_aliases = {"APP_ID": ["KEGTRON_PROXY"]}
     type_conversions = {"int": to_int, "bool": to_bool, "list": to_list, "dict": to_dict}

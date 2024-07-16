@@ -59,7 +59,7 @@ def parse_scan(data):
     port_data = {
         "keg_vol_ml": keg_vol,
         "start_volume": vol_start,
-        "Volume_dispensed_ml": vol_disp,
+        "volume_dispensed_ml": vol_disp,
         "port_name": port_name.decode("utf-8"),
         "last_update_timestamp_utc": utcnow_aware(),
         "configured": port_configured,

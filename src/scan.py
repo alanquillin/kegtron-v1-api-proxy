@@ -1,7 +1,7 @@
 import argparse
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 
 from adafruit_ble import BLERadio
@@ -20,7 +20,7 @@ CONFIG = Config()
 proxy_url_prefix = None
 
 kegtron_devices = {}
-
+device_updates = {}
 
 def name_to_id(name):
     return name.lower().replace(" ", "-")
@@ -63,16 +63,46 @@ def save_device(data):
         return True
 
 
-def update_device(data):
+def update_device(data, port_data, port_data_raw):
     if not CONFIG.get("proxy.enabled"):
         return
+    
+    mac = data["mac"]
+    port_index = port_data["port_index"]
+    force_device_update_after_sec = CONFIG.get("force_device_update_after_sec")
+    now = utcnow_aware()
 
-    # TODO This is going to get chatty.  Should store that hash for the data and last saved time and on update on a change to the device OR after a period of time.  
+    if not mac in device_updates.keys():
+        device_updates[mac] = {
+            "ports": {}
+        }
+
+    if not port_index in device_updates[mac]["ports"].keys():
+        device_updates[mac]["ports"][port_index] = {
+            "updated": now - timedelta(seconds = force_device_update_after_sec + 1),
+            "raw": port_data_raw
+        }
+
+    old_port_data_raw = device_updates[mac]["ports"][port_index]["raw"]
+    old_port_updated = device_updates[mac]["ports"][port_index]["updated"]
+
+    delta = now - old_port_updated
+    if delta.seconds < force_device_update_after_sec:
+        if port_data_raw == old_port_data_raw:
+            LOG.debug(f'Port data did not change for {data["id"]} on port {port_index} and its still within the force update window, skipping update')
+            return
+        else:
+            LOG.info(f'Device port data changed for {data["id"]} on port {port_index}.  Updating proxy.  Old data: {old_port_data_raw}, new data: {port_data_raw}')
+    else:
+        LOG.info(f'Update window exceeded for {data["id"]} on port {port_index}, updating the proxy.  Last update: {old_port_updated.isoformat()}')
+
     LOG.debug(f'Updating device "{data.get("name")}" on proxy.  Device data: {data}')
     r = requests.put(f'{proxy_url_prefix}/devices/{data.get("id")}', json=to_json(data))
     if r.status_code != 200:
         LOG.error(f'Failed to update device data. Status Code: {r.status_code}, Message: {r.text}')
     else:
+        device_updates[mac]["ports"][port_index]["raw"] = port_data_raw
+        device_updates[mac]["ports"][port_index]["updated"] = now
         LOG.debug('Device data updated!')
 
 
@@ -90,7 +120,8 @@ def on_adv(adv):
         raw_data = bytes(adv)
         LOG.debug(f'Raw Data: {raw_data}')
         try:
-            parsed_data = kegtron_parser.parse(raw_data[0:31])
+            raw_data = raw_data[0:31]
+            parsed_data = kegtron_parser.parse(raw_data)
         except Exception as ex:
             LOG.error(f'Failed to parse Kegtron data: Error: {ex.message}, Data: {raw_data}')
             return
@@ -101,7 +132,7 @@ def on_adv(adv):
         port_data = parsed_data["port_data"]
         kegtron_devices[addr]["ports"][port_data["port_index"]] = port_data
 
-        update_device(kegtron_devices[addr])
+        update_device(kegtron_devices[addr], port_data, raw_data)
 
         LOG.debug(kegtron_devices[addr])
 
