@@ -1,9 +1,9 @@
 # Python base
 # ############################################################
-FROM python:3.11-slim-bullseye as python-base
+FROM python:3.11-slim-bullseye AS python-base
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc build-essential libpq-dev libffi-dev libssl-dev bluetooth    \
+    && apt-get install -y --no-install-recommends gcc build-essential libpq-dev libffi-dev libssl-dev bluez bluez-hcidump bluetooth    \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -U pip 
@@ -30,4 +30,4 @@ WORKDIR /kegtron-v1-api-proxy/src
 
 EXPOSE 5000
 
-ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "entrypoint.sh"]

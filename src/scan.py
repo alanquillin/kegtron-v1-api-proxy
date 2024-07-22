@@ -122,6 +122,10 @@ def on_adv(adv):
         try:
             raw_data = raw_data[0:31]
             parsed_data = kegtron_parser.parse(raw_data)
+            LOG.debug(f'Parsed data for mac `{addr}`: {parsed_data}')
+            if not parsed_data:
+                LOG.debug(f'Parsed data is empty, skipping advertisement.')
+                return
         except Exception as ex:
             LOG.error(f'Failed to parse Kegtron data: Error: {ex.message}, Data: {raw_data}')
             return
@@ -156,15 +160,7 @@ if __name__ == "__main__":
 
     proxy_url_prefix = f'{CONFIG.get("proxy.scheme")}://{CONFIG.get("proxy.hostname")}:{CONFIG.get("proxy.port")}/api/internal/v1'
     
-    init_logging(config=CONFIG)
-
-    ignore_logging_modules = ['bleson']
-    for i in ignore_logging_modules:
-        _l = logging.getLogger(i)
-        _l.setLevel(logging.ERROR)
-
-    log_level = getattr(logging, args.loglevel)
-    LOG.setLevel(log_level)
+    init_logging(config=CONFIG, arg_log_level=args.loglevel)
 
     ble = BLERadio()
     try:

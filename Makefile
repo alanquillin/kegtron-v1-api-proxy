@@ -31,9 +31,9 @@ ifeq ($(POETRY),)
 $(error Poetry is not installed and is required)
 endif
 
-# ifeq ($(DOCKER),)
-# $(error Docker is not installed and is required)
-# endif
+ifeq ($(DOCKER),)
+$(error Docker is not installed and is required)
+endif
 
 ifneq ("$(wildcard .env)","")
     include .env

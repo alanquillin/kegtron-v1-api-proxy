@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 if [ "${RUN_ENV}" = "dev" ]; then
     export FLASK_ENV="development"
@@ -6,6 +6,8 @@ if [ "${RUN_ENV}" = "dev" ]; then
 fi
 
 if [ "${KEGTRON_PROXY_ROLE}" = "scanner" ]; then
+    service dbus start
+    bluetoothd &
     poetry run python scan.py ${LOG_LEVEL_PARAM}
 fi
 
