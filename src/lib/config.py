@@ -66,12 +66,12 @@ def to_dict(val, *args):
         sep = ","
         if args:
             sep = args[0]
-        for item in val.trim().split(sep):
+        for item in val.strip().split(sep):
             sep2 = "="
             if args and len(args) > 1:
                 sep2 = args[1]
-            parts = item.trim().split(sep2)
-            data[parts[0].trim()] = parts[1].trim()
+            parts = item.strip().split(sep2)
+            data[parts[0].strip()] = parts[1].strip()
         return data
 
     return dict(val)
@@ -80,10 +80,13 @@ def to_dict(val, *args):
 class Config(metaclass=ThreadSafeSingleton):
     defaults = {
         "proxy": {"scheme": "http", "port": 5000, "hostname": "localhost", "enabled": True},
-        "force_device_update_after_sec": 300
+        "force_device_update_after_sec": 300,
+        "logging": {
+            "levels": "bleak.backends.bluezdbus.manager=INFO"
+        }
     }
 
-    default_schema = {"proxy.port": "int", "proxy.enabled": "bool", "logging.levels": "dict", "force_device_update_after_sec": "int"}
+    default_schema = {"proxy.port": "int", "proxy.enabled": "bool", "logging": "dict", "logging.levels": "dict", "force_device_update_after_sec": "int"}
 
     key_aliases = {"APP_ID": ["KEGTRON_PROXY"]}
     type_conversions = {"int": to_int, "bool": to_bool, "list": to_list, "dict": to_dict}

@@ -1,13 +1,11 @@
 import argparse
+import asyncio
 import os
 import logging
 from datetime import datetime, timedelta
 import sys
 
-from adafruit_ble import BLERadio
-from adafruit_ble.advertising import Advertisement
-from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
-from flask import jsonify
+from bleak import BleakScanner
 import requests
 
 from lib.logging import init as init_logging 
@@ -20,7 +18,7 @@ CONFIG = Config()
 proxy_url_prefix = None
 
 kegtron_devices = {}
-device_updates = {}
+device_updates = {} 
 
 def name_to_id(name):
     return name.lower().replace(" ", "-")
@@ -37,7 +35,7 @@ def to_json(data):
     
     return data
 
-def add_new_dev(addr, name, adv):
+def add_new_dev(addr, name):
     data = {"mac": addr, "name": name, "id": name_to_id(name), "ports": {}}
     if save_device(data):
         kegtron_devices[addr] = data
@@ -106,21 +104,26 @@ def update_device(data, port_data, port_data_raw):
         LOG.debug('Device data updated!')
 
 
-def on_adv(adv):
-    addr = adv.address.string
+def on_adv(dev, adv):
+    addr = dev.address
+    name = dev.name
     if(addr not in kegtron_devices.keys()):
-        if adv.short_name and adv.short_name.startswith("Kegtron"):
-            add_new_dev(addr, adv.short_name, adv)
-        elif adv.complete_name and adv.complete_name.startswith("Kegtron"):
-            add_new_dev(addr, adv.complete_name, adv)
+        if name and name.startswith("Kegtron"):
+            add_new_dev(addr, name)
 
     if(addr in kegtron_devices.keys()):
         kegtron_devices[addr]["rssi"] = adv.rssi
         kegtron_devices[addr]["last_advertisement_timestamp_utc"] = utcnow_aware()
-        raw_data = bytes(adv)
+        LOG.debug(f'Advertisement Data: {repr(adv)}')
+        if not adv.manufacturer_data:
+            LOG.debug("no manufacturer data, skipping advertisement")
+            return
+        raw_data = adv.manufacturer_data.get(65535)
+        if not raw_data:
+            LOG.debug("Expected manufacturer '65535' was not found.  Skipping advertisement")
+            return
         LOG.debug(f'Raw Data: {raw_data}')
         try:
-            raw_data = raw_data[0:31]
             parsed_data = kegtron_parser.parse(raw_data)
             LOG.debug(f'Parsed data for mac `{addr}`: {parsed_data}')
             if not parsed_data:
@@ -139,6 +142,14 @@ def on_adv(adv):
         update_device(kegtron_devices[addr], port_data, raw_data)
 
         LOG.debug(kegtron_devices[addr])
+
+
+async def listener():
+    async with BleakScanner() as scanner:
+        LOG.debug("Scanning...")
+
+        async for dev, adv in scanner.advertisement_data():
+            on_adv(dev, adv)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -162,14 +173,9 @@ if __name__ == "__main__":
     
     init_logging(config=CONFIG, arg_log_level=args.loglevel)
 
-    ble = BLERadio()
     try:
-        LOG.info("Starting scanner...")
-        for advertisement in ble.start_scan(ProvideServicesAdvertisement, Advertisement):
-            on_adv(advertisement)
-
+        asyncio.run(listener())
     except KeyboardInterrupt:
         LOG.info("Stopping scanner..")
-        ble.stop_scan()
         LOG.info("Scanner stopped!")
         sys.exit()

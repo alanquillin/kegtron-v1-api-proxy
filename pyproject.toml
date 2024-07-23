@@ -51,13 +51,13 @@ authors = ["alanquillin"]
 description = "Kegtron v1 API Proxy"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.8,<3.13"
 flask = "^3.0"
 alembic = "^1.13.2"
 simplejson = "^3.19.2"
 gevent = "^24.2.1"
 python-dateutil = "^2.9.0"
-adafruit-circuitpython-ble = "^10.0.7"
+bleak = "^0.22.2"
 requests = "^2.32.3"
 
 [tool.poetry.dev-dependencies]
